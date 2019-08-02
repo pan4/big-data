@@ -10,7 +10,7 @@ public class AverageSalary {
     public static void main(String[] args) {
         SparkSession spark = SparkSession.builder()
                 .appName("Average Salary")
-                .master("local[*]")
+//                .master("local[*]")
                 .getOrCreate();
 
         Dataset<Row> df = spark.read().json("/home/alex/Projects/apanchenko-bgd02/src/main/resources/hh-vacs");
