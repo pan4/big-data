@@ -5,7 +5,7 @@ import java.io.Serializable;
 public class BrowserStats implements Serializable {
     private String agentName;
     private String visitDate;
-    private String city;
+    private long numIp;
 
     public String getAgentName() {
         return agentName;
@@ -23,12 +23,12 @@ public class BrowserStats implements Serializable {
         this.visitDate = visitDate;
     }
 
-    public String getCity() {
-        return city;
+    public long getNumIp() {
+        return numIp;
     }
 
-    public void setCity(String city) {
-        this.city = city;
+    public void setNumIp(long numIp) {
+        this.numIp = numIp;
     }
 
     @Override
@@ -36,7 +36,7 @@ public class BrowserStats implements Serializable {
         return "BrowserStats{" +
                 "agentName='" + agentName + '\'' +
                 ", visitDate='" + visitDate + '\'' +
-                ", city='" + city + '\'' +
+                ", numIp=" + numIp +
                 '}';
     }
 }
