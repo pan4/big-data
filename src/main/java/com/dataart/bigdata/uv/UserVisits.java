@@ -14,7 +14,8 @@ public class UserVisits {
         SparkConf conf = new SparkConf().setAppName("UserVisits").setMaster("local[*]");
         JavaSparkContext sc = new JavaSparkContext(conf);
 
-        JavaRDD<String> stringJavaRDD = sc.textFile("/home/alex/Projects/apanchenko-bgd02/src/main/resources/uservisits");
+//        JavaRDD<String> stringJavaRDD = sc.textFile("/src/main/resources/uservisits");
+        JavaRDD<String> stringJavaRDD = sc.textFile("src\\main\\resources\\uservisits");
 
         JavaRDD<String[]> splitRecords = stringJavaRDD.map(s -> s.split(","));
 
