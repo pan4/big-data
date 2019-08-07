@@ -8,6 +8,7 @@ import org.apache.spark.mllib.recommendation.MatrixFactorizationModel;
 import org.apache.spark.mllib.recommendation.Rating;
 import scala.Tuple2;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,15 +21,22 @@ public class TagRecommender {
     private static MatrixFactorizationModel model;
 
     public static void main(String[] args) {
-        System.out.println(args);
-
-        SparkConf conf = new SparkConf().setAppName("Tag Recommender").setMaster("local[*]");
+        SparkConf conf = new SparkConf()
+//                .setMaster("local[*]")
+                .setAppName("Tag Recommender");
         sc = new JavaSparkContext(conf);
 
         tagNames = sc.textFile(INT_TO_TAG_PATH);
         model = MatrixFactorizationModel.load(sc.sc(), MODEL_PATH);
 
-        System.out.println(recommend(4, 5));
+        List<List<Tuple2<Double, String>>> results = new ArrayList<>();
+        if (args.length > 1) {
+            int number = Integer.parseInt(args[0]);
+            for (int i = 1; i < args.length; i++) {
+                results.add(recommend(Integer.parseInt(args[i]), number));
+            }
+        }
+        System.out.println(results);
     }
 
     private static List<Tuple2<Double, String>> recommend(int postId, int number) {

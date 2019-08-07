@@ -13,20 +13,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ModelTrainer {
-    public static final String MODEL_PATH = "target/tmp/myCollaborativeFilter";
-    public static final String INT_TO_TAG_PATH = "target/tmp/tagNames.csv";
+    public static final String MODEL_PATH = "/home/alex/Projects/apanchenko-bgd02/target/tmp/myCollaborativeFilter";
+    public static final String INT_TO_TAG_PATH = "/home/alex/Projects/apanchenko-bgd02/target/tmp/tagNames.csv";
 
     public static void main(String[] args) {
         SparkSession spark = SparkSession.builder()
                 .appName("PostTags Recommender")
-                .master("local[*]")
+//                .master("local[*]")
                 .getOrCreate();
 
         Dataset<Row> df = spark.read()
                 .format("com.databricks.spark.xml")
                 .option("rowTag", "row")
-//                .load("C:\\Users\\apanchenko\\Projects\\big-data\\stackoverflow.com-Posts\\Posts.xml");
-                .load("src\\main\\resources\\Posts.xml");
+                .load("/home/alex/Projects/apanchenko-bgd02/src/main/resources/Posts.xml");
 
         Encoder<PostTags> postTagEncoder = Encoders.bean(PostTags.class);
         Dataset<PostTags> tagDataset = df.select("_Id", "_Tags").flatMap((Row row) -> {
@@ -54,13 +53,13 @@ public class ModelTrainer {
                 .csv(INT_TO_TAG_PATH);
 
         Encoder<Rating> ratingEncoder = Encoders.bean(Rating.class);
-        Dataset<Rating> rating = tagDataset.join(tagNames, tagDataset.col("tagName").equalTo(tagNames.col("tagName")),"left")
+        Dataset<Rating> rating = tagDataset.join(tagNames, tagDataset.col("tagName").equalTo(tagNames.col("tagName")), "left")
                 .select("postId", "tagId")
                 .map((Row row) -> {
                     int productId = row.get(1) == null ? 0 : (int) row.get(1);
                     double rat = productId == 0 ? 0 : 1;
                     return new Rating(row.getInt(0), productId, rat);
-                    }, ratingEncoder);
+                }, ratingEncoder);
 
         MatrixFactorizationModel model = ALS.trainImplicit(rating.rdd(), 30, 10);
         model.save(spark.sparkContext(), MODEL_PATH);

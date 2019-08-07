@@ -11,11 +11,12 @@ import static com.dataart.bigdata.uv.UserVisitsSchema.COUNTRY_CODE;
 
 public class UserVisits {
     public static void main(String[] args) {
-        SparkConf conf = new SparkConf().setAppName("UserVisits").setMaster("local[*]");
+        SparkConf conf = new SparkConf()
+//                .setMaster("local[*]")
+                .setAppName("UserVisits");
         JavaSparkContext sc = new JavaSparkContext(conf);
 
-//        JavaRDD<String> stringJavaRDD = sc.textFile("/src/main/resources/uservisits");
-        JavaRDD<String> stringJavaRDD = sc.textFile("src\\main\\resources\\uservisits");
+        JavaRDD<String> stringJavaRDD = sc.textFile("/home/alex/Projects/apanchenko-bgd02/src/main/resources/uservisits");
 
         JavaRDD<String[]> splitRecords = stringJavaRDD.map(s -> s.split(","));
 

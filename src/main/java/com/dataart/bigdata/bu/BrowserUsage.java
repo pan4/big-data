@@ -18,7 +18,7 @@ public class BrowserUsage {
     public static void main(String[] args) {
         SparkSession spark = SparkSession.builder()
                 .appName("Browser Usage")
-                .master("local[*]")
+//                .master("local[*]")
                 .getOrCreate();
 
         Configuration hadoopConf = spark.sparkContext().hadoopConfiguration();
@@ -35,15 +35,15 @@ public class BrowserUsage {
         Dataset<Row> blocks = spark.read()
                 .format("csv")
                 .option("header", "true")
-                .load("src/main/resources/GeoLiteCity_20151103/GeoLiteCity-Blocks.csv");
+                .load("/home/alex/Projects/apanchenko-bgd02/src/main/resources/GeoLiteCity_20151103/GeoLiteCity-Blocks.csv");
 
         Dataset<Row> locations = spark.read()
                 .format("csv")
                 .option("header", "true")
-                .load("src/main/resources/GeoLiteCity_20151103/GeoLiteCity-Location.csv");
+                .load("/home/alex/Projects/apanchenko-bgd02/src/main/resources/GeoLiteCity_20151103/GeoLiteCity-Location.csv");
 
         JavaRDD<BrowserStats> javaRDD = spark.read()
-                .textFile("s3a://big-data-benchmark/pavlo/text/tiny/uservisits")
+                .textFile("s3a://big-data-benchmark/pavlo/text/tiny/uservisits/part-00000")
                 .javaRDD()
                 .map(line -> {
                     String[] parts = line.split(",");
