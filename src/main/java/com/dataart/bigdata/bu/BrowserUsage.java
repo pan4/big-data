@@ -8,6 +8,8 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 
+import java.util.Properties;
+
 import static com.dataart.bigdata.uv.UserVisitsSchema.SOURCE_IP;
 import static com.dataart.bigdata.uv.UserVisitsSchema.USER_AGENT;
 import static com.dataart.bigdata.uv.UserVisitsSchema.VISIT_DATE;
@@ -63,12 +65,16 @@ public class BrowserUsage {
         Dataset<Row> withCity = withLocId.join(locations, withLocId.col("locId").equalTo(locations.col("locId")),"left")
                 .select("agentName", "visitDate", "city");
 
-        withCity.groupBy(withCity.col("agentName"), withCity.col("city"),
+        Dataset<Row> result = withCity.groupBy(withCity.col("agentName"), withCity.col("city"),
                 year(withCity.col("visitDate")).as("year"),
                 month(withCity.col("visitDate")).as("month"))
                 .count()
-                .orderBy("year", "month")
-                .show();
+                .orderBy("year", "month");
+
+        Properties connectionProps = new Properties();
+        connectionProps.put("user","root");
+        connectionProps.put("password","password");
+        result.write().jdbc("jdbc:mysql://localhost:3306/bigdata","browser_usage", connectionProps);
     }
 
     private static long ipToLong(String ipAddress) {

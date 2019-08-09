@@ -8,6 +8,8 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Properties;
 
+import static com.dataart.bigdata.streaming.MeasurementProcessor.INPUT;
+
 public class MyConsumer {
 
     public static void main(String[] args) {
@@ -20,7 +22,7 @@ public class MyConsumer {
         props.setProperty("value.deserializer", "com.dataart.bigdata.kafka.MeasurementDeserializer");
 
         KafkaConsumer<String, Measurement> consumer = new KafkaConsumer<>(props);
-        consumer.subscribe(Arrays.asList("two-partitions"));
+        consumer.subscribe(Arrays.asList(INPUT));
 
         while (true) {
             ConsumerRecords<String, Measurement> records = consumer.poll(Duration.ofMillis(100));

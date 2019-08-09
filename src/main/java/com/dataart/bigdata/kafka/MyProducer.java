@@ -11,6 +11,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static com.dataart.bigdata.streaming.MeasurementProcessor.INPUT;
+
 public class MyProducer {
 
     public static void main(String[] args) {
@@ -21,14 +23,21 @@ public class MyProducer {
         props.put("value.serializer", "com.dataart.bigdata.kafka.MeasurementSerializer");
 
         Producer<String, Measurement> producer = new KafkaProducer<>(props);
+        Runtime.getRuntime().addShutdownHook(new Thread("shutdown-hook") {
+            @Override
+            public void run() {
+                producer.close();
+            }
+        });
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
 
-        Future<?> device = executor.submit(() -> {
+        Future<?> sender = executor.submit(() -> {
             int i = 0;
             while (!Thread.currentThread().isInterrupted()) {
-                Measurement value = new Measurement("temp sensor", System.currentTimeMillis(), i);
-                producer.send(new ProducerRecord("two-partitions", value));
+                String device = i % 2 == 0 ? "temp sensor" : "pressure sensor";
+                Measurement value = new Measurement(device, System.currentTimeMillis(), i);
+                producer.send(new ProducerRecord(INPUT, value));
                 i++;
                 try {
                     TimeUnit.SECONDS.sleep(1);
@@ -36,13 +45,6 @@ public class MyProducer {
                     Thread.currentThread().interrupt();
                     e.printStackTrace();
                 }
-            }
-        });
-
-        Runtime.getRuntime().addShutdownHook(new Thread("shutdown-hook") {
-            @Override
-            public void run() {
-                producer.close();
             }
         });
 
@@ -54,7 +56,7 @@ public class MyProducer {
             e.printStackTrace();
         }
 
-        device.cancel(true);
+        sender.cancel(true);
         executor.shutdown();
         try {
             executor.awaitTermination(1,TimeUnit.DAYS);
